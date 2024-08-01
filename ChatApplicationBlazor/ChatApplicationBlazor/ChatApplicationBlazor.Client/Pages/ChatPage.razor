@@ -1,0 +1,113 @@
+﻿@page "/chat"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager NavManager
+@rendermode InteractiveWebAssembly
+
+<PageTitle>ChatApp</PageTitle>
+
+@* style in app.css in wwwroot*@
+
+<div class="row">
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">Chat Hub</div>
+            @if (Messages.Any())
+            {
+                <div class="card-body">
+                    <ul class="list-group">
+                        @foreach (var message in Messages)
+                        {
+                            <li class="list-group-item message-item @(message.Contains("has left the chat") ? "left" : (message.Contains("System") ? "system" : "user"))">
+                                @((MarkupString)message)
+                            </li>
+                        }
+                    </ul>
+                </div>
+            }
+            <div class="card-footer">
+                @if (IsConnected)
+                {
+                    <div class="alert alert-success">Chat Connected</div>
+                    <div>
+                        <input class="form-control mb-2" @bind="userName" placeholder="Enter your username" />
+                        <textarea class="form-control mb-2" @bind="Message" placeholder="Enter your message" rows="3"></textarea>
+                        <div class="d-flex justify-content-between">
+                            <button class="btn btn-success" @onclick="SendMessage" disabled="@(string.IsNullOrEmpty(userName) || string.IsNullOrEmpty(Message))">Send Message</button>
+                            <button class="btn btn-danger" @onclick="LeaveChat">Leave Chat</button>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-danger">Chat Disconnected</div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private HubConnection? hubConnection;
+    private List<string> Messages = new();
+    private string? userName;
+    private string? Message;
+    private DateTime Date = DateTime.Now;
+
+    private bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavManager.ToAbsoluteUri("/chathub"))
+            .Build();
+
+        hubConnection.On<string, string, DateTime>("ReceiveMessage", (user, message, date) =>
+        {
+            var encodedMessage = $"{user} at {date}: {message}";
+            Messages.Add(encodedMessage);
+            InvokeAsync(StateHasChanged);
+        });
+
+        hubConnection.Closed += async (error) =>
+        {
+            await Task.Delay(new Random().Next(0, 5) * 1000);
+            await hubConnection.StartAsync();
+            StateHasChanged();
+        };
+
+        await hubConnection.StartAsync();
+        StateHasChanged();
+    }
+
+    private async Task SendMessage()
+    {
+        if (hubConnection is not null && userName is not null && Message is not null)
+        {
+            await hubConnection.SendAsync("SendMessage", userName, Message, Date);
+            Message = string.Empty;
+        }
+    }
+
+    private async Task LeaveChat()
+    {
+        if (hubConnection is not null && userName is not null)
+        {
+            // Notify others that this user has left the chat
+            await hubConnection.SendAsync("SendMessage", "System", $"{userName} has left the chat.", Date);
+
+            await hubConnection.StopAsync();
+            await hubConnection.DisposeAsync();
+            hubConnection = null;
+            Messages.Clear();
+            StateHasChanged();
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+    }
+}
