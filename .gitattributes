@@ -1,7 +1,6 @@
 # Auto detect text files and perform LF normalization
- *linguist-language=C#
-*.html linguist-language=HTML
-*.htm linguist-language=HTML
+*linguist-language=C#
+
 
 
 
