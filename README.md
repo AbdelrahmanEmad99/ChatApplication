@@ -4,7 +4,7 @@ ChatApp is a real-time chat application built using ASP.NET Core SignalR and Bla
 # Features
 * ### Real-Time Messaging: Utilize SignalR for real-time communication between users, allowing messages to be sent and received instantly.
 
-User Management: Allows users to join the chat by entering a username. Messages are tagged with the sender's username and timestamp.
++ ### User Management: Allows users to join the chat by entering a username. Messages are tagged with the sender's username and timestamp.
 
 Disconnect and Reconnect: Handles network disconnections and automatic reconnections. Users are notified if the chat is disconnected and can see when it reconnects.
 
