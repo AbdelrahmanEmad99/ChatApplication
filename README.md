@@ -2,7 +2,7 @@
 ##### ChatApp is a real-time chat application built using ASP.NET Core SignalR and Blazor WebAssembly. This project demonstrates a simple yet functional chat interface that supports real-time messaging, connection management, and user interaction.
 
 # Features
-* #### Real-Time Messaging: Utilize SignalR for real-time communication between users, allowing messages to be sent and received instantly.
+* #### Real-Time Messaging: ### Utilize SignalR for real-time communication between users, allowing messages to be sent and received instantly.
 
 * #### User Management: Allows users to join the chat by entering a username. Messages are tagged with the sender's username and timestamp.
 
