@@ -1,5 +1,5 @@
 # Auto detect text files and perform LF normalization
-# Set default language to C#
+
 * linguist-language=C#
 
 # Specific file types
